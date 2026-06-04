@@ -27,6 +27,9 @@ export const parseBruRequest = (data: string | any, parsed: boolean = false): an
       case 'ws':
         requestType = 'ws-request';
         break;
+      case 'amqp':
+        requestType = 'amqp-request';
+        break;
       default:
         requestType = 'http-request';
     }
@@ -36,6 +39,7 @@ export const parseBruRequest = (data: string | any, parsed: boolean = false): an
     const urlPath: Record<typeof requestType, string> = {
       'grpc-request': 'grpc.url',
       'ws-request': 'ws.url',
+      'amqp-request': 'amqp.url',
       'default': 'http.url'
     };
     const transformedJson = {
@@ -86,6 +90,21 @@ export const parseBruRequest = (data: string | any, parsed: boolean = false): an
       transformedJson.request.body = _.get(json, 'body', {
         mode: 'ws',
         ws: _.get(json, 'body.ws', [
+          {
+            name: 'message 1',
+            content: '{}'
+          }
+        ])
+      });
+    } else if (requestType === 'amqp-request') {
+      transformedJson.request.auth.mode = _.get(json, 'amqp.auth', 'none');
+      (transformedJson.request as any).exchange = _.get(json, 'amqp.exchange', '');
+      (transformedJson.request as any).exchangeType = _.get(json, 'amqp.exchangeType', 'direct');
+      (transformedJson.request as any).routingKey = _.get(json, 'amqp.routingKey', '');
+      (transformedJson.request as any).queue = _.get(json, 'amqp.queue', '');
+      transformedJson.request.body = _.get(json, 'body', {
+        mode: 'amqp',
+        amqp: _.get(json, 'body.amqp', [
           {
             name: 'message 1',
             content: '{}'

@@ -529,7 +529,8 @@ const parseYmlFileMeta = (data) => {
       http: 'http-request',
       graphql: 'graphql-request',
       grpc: 'grpc-request',
-      ws: 'ws-request'
+      ws: 'ws-request',
+      amqp: 'amqp-request'
     };
     requestType = typeMap[requestType] || 'http-request';
 

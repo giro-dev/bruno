@@ -581,6 +581,63 @@ const wsSettingsSchema = Yup.object({
     .nullable()
 });
 
+const amqpRequestSchema = Yup.object({
+  url: requestUrlSchema,
+  exchange: Yup.string().nullable(),
+  exchangeType: Yup.string().oneOf(['direct', 'topic', 'fanout', 'headers', '']).nullable(),
+  routingKey: Yup.string().nullable(),
+  queue: Yup.string().nullable(),
+  headers: Yup.array().of(keyValueSchema).required('headers are required'),
+  auth: authSchema,
+  body: Yup.object({
+    mode: Yup.string().oneOf(['amqp']).required('mode is required'),
+    amqp: Yup.array()
+      .of(
+        Yup.object({
+          name: Yup.string().nullable(),
+          type: Yup.string().nullable(),
+          content: Yup.string().nullable()
+        })
+      )
+      .nullable()
+  })
+    .strict()
+    .required('body is required'),
+  script: Yup.object({
+    req: Yup.string().nullable(),
+    res: Yup.string().nullable()
+  })
+    .noUnknown(true)
+    .strict(),
+  vars: Yup.object({
+    req: Yup.array().of(varsSchema).nullable(),
+    res: Yup.array().of(varsSchema).nullable()
+  })
+    .noUnknown(true)
+    .strict()
+    .nullable(),
+  assertions: Yup.array().of(assertionSchema).nullable(),
+  tests: Yup.string().nullable(),
+  docs: Yup.string().nullable()
+})
+  .noUnknown(true)
+  .strict();
+
+const amqpSettingsSchema = Yup.object({
+  settings: Yup.object({
+    timeout: Yup.number()
+      .default(5000),
+    heartbeat: Yup.number()
+      .default(0),
+    prefetch: Yup.number()
+      .default(0),
+    vhost: Yup.string()
+      .default('/')
+  }).noUnknown(true)
+    .strict()
+    .nullable()
+});
+
 const folderRootSchema = Yup.object({
   request: Yup.object({
     headers: Yup.array().of(keyValueSchema).nullable(),
@@ -618,7 +675,7 @@ const folderRootSchema = Yup.object({
 
 const itemSchema = Yup.object({
   uid: uidSchema,
-  type: Yup.string().oneOf(['http-request', 'graphql-request', 'folder', 'js', 'grpc-request', 'ws-request']).required('type is required'),
+  type: Yup.string().oneOf(['http-request', 'graphql-request', 'folder', 'js', 'grpc-request', 'ws-request', 'amqp-request']).required('type is required'),
   seq: Yup.number().min(1),
   name: Yup.string().min(1, 'name must be at least 1 character').required('name is required'),
   tags: Yup.array().of(Yup.string().min(1, 'tag must not be empty')),
@@ -628,9 +685,13 @@ const itemSchema = Yup.object({
     otherwise: Yup.mixed().when('type', {
       is: (type) => type === 'ws-request',
       then: wsRequestSchema.required('request is required when item-type is ws-request'),
-      otherwise: requestSchema.when('type', {
-        is: (type) => ['http-request', 'graphql-request'].includes(type),
-        then: (schema) => schema.required('request is required when item-type is request')
+      otherwise: Yup.mixed().when('type', {
+        is: (type) => type === 'amqp-request',
+        then: amqpRequestSchema.required('request is required when item-type is amqp-request'),
+        otherwise: requestSchema.when('type', {
+          is: (type) => ['http-request', 'graphql-request'].includes(type),
+          then: (schema) => schema.required('request is required when item-type is request')
+        })
       })
     })
   }),
@@ -638,14 +699,18 @@ const itemSchema = Yup.object({
     .when('type', {
       is: (type) => type === 'ws-request',
       then: wsSettingsSchema,
-      otherwise: Yup.object({
-        encodeUrl: Yup.boolean().nullable(),
-        followRedirects: Yup.boolean().nullable(),
-        maxRedirects: Yup.number().min(0).max(50).nullable(),
-        timeout: Yup.mixed().nullable(),
-      }).noUnknown(true)
-    .strict()
-    .nullable()
+      otherwise: Yup.mixed().when('type', {
+        is: (type) => type === 'amqp-request',
+        then: amqpSettingsSchema,
+        otherwise: Yup.object({
+          encodeUrl: Yup.boolean().nullable(),
+          followRedirects: Yup.boolean().nullable(),
+          maxRedirects: Yup.number().min(0).max(50).nullable(),
+          timeout: Yup.mixed().nullable(),
+        }).noUnknown(true)
+      .strict()
+      .nullable()
+      })
     }),
   fileContent: Yup.string().when('type', {
     // If the type is 'js', the fileContent field is expected to be a string.

@@ -880,7 +880,7 @@ export const deleteItemInCollectionByPathname = (pathname, collection) => {
 };
 
 export const isItemARequest = (item) => {
-  return item.hasOwnProperty('request') && ['http-request', 'graphql-request', 'grpc-request', 'ws-request'].includes(item.type) && !item.items;
+  return item.hasOwnProperty('request') && ['http-request', 'graphql-request', 'grpc-request', 'ws-request', 'amqp-request'].includes(item.type) && !item.items;
 };
 
 export const isItemAFolder = (item) => {
@@ -1131,7 +1131,7 @@ export const getDefaultRequestPaneTab = (item) => {
     return 'query';
   }
 
-  if (['ws-request', 'grpc-request'].includes(item.type)) {
+  if (['ws-request', 'grpc-request', 'amqp-request'].includes(item.type)) {
     return 'body';
   }
 };

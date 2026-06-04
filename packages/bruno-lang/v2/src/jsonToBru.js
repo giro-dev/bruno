@@ -14,7 +14,7 @@ const stripLastLine = (text) => {
 };
 
 const jsonToBru = (json) => {
-  const { meta, http, grpc, ws, params, headers, metadata, auth, body, script, tests, vars, assertions, settings, docs, examples } = json;
+  const { meta, http, grpc, ws, amqp, params, headers, metadata, auth, body, script, tests, vars, assertions, settings, docs, examples } = json;
 
   let bru = '';
 
@@ -111,6 +111,46 @@ const jsonToBru = (json) => {
     if (ws.methodType && ws.methodType.length) {
       bru += `
   methodType: ${ws.methodType}`;
+    }
+
+    bru += `
+}
+
+`;
+  }
+
+  if (amqp && amqp.url) {
+    bru += `amqp {
+  url: ${amqp.url}`;
+
+    if (amqp.exchange && amqp.exchange.length) {
+      bru += `
+  exchange: ${amqp.exchange}`;
+    }
+
+    if (amqp.exchangeType && amqp.exchangeType.length) {
+      bru += `
+  exchangeType: ${amqp.exchangeType}`;
+    }
+
+    if (amqp.routingKey && amqp.routingKey.length) {
+      bru += `
+  routingKey: ${amqp.routingKey}`;
+    }
+
+    if (amqp.queue && amqp.queue.length) {
+      bru += `
+  queue: ${amqp.queue}`;
+    }
+
+    if (amqp.body && amqp.body.length) {
+      bru += `
+  body: ${amqp.body}`;
+    }
+
+    if (amqp.auth && amqp.auth.length) {
+      bru += `
+  auth: ${amqp.auth}`;
     }
 
     bru += `
@@ -637,6 +677,29 @@ ${indentString(body.sparql)}
         const { name, content, type = '' } = message;
 
         bru += `body:ws {\n`;
+
+        bru += `${indentString(`name: ${getValueString(name)}`)}\n`;
+        if (type.length) {
+          bru += `${indentString(`type: ${getValueString(type)}`)}\n`;
+        }
+
+        // Convert content to JSON string if it's an object
+        let contentValue = typeof content === 'object' ? JSON.stringify(content, null, 2) : content || '{}';
+
+        // Wrap content with triple quotes for multiline support, without extra indentation
+        bru += `${indentString(`content: '''\n${indentString(contentValue)}\n'''`)}\n`;
+        bru += '}\n\n';
+      });
+    }
+  }
+
+  if (body && body.amqp) {
+    // Convert each AMQP message to a separate body:amqp block
+    if (Array.isArray(body.amqp)) {
+      body.amqp.forEach((message) => {
+        const { name, content, type = '' } = message;
+
+        bru += `body:amqp {\n`;
 
         bru += `${indentString(`name: ${getValueString(name)}`)}\n`;
         if (type.length) {
