@@ -109,14 +109,14 @@ const AmqpQueryUrl = ({ item, collection, handleRun }) => {
       }
     };
 
-    ipcRenderer.on('main:amqp:connected', handleConnected);
-    ipcRenderer.on('main:amqp:disconnected', handleDisconnected);
-    ipcRenderer.on('main:amqp:error', handleError);
+    const removeConnected = ipcRenderer.on('main:amqp:connected', handleConnected);
+    const removeDisconnected = ipcRenderer.on('main:amqp:disconnected', handleDisconnected);
+    const removeError = ipcRenderer.on('main:amqp:error', handleError);
 
     return () => {
-      ipcRenderer.removeListener('main:amqp:connected', handleConnected);
-      ipcRenderer.removeListener('main:amqp:disconnected', handleDisconnected);
-      ipcRenderer.removeListener('main:amqp:error', handleError);
+      removeConnected();
+      removeDisconnected();
+      removeError();
     };
   }, [item.uid, collection.uid]);
 

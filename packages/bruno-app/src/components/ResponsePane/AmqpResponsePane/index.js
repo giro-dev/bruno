@@ -103,14 +103,14 @@ const AmqpResponsePane = ({ item, collection }) => {
       }
     };
 
-    ipcRenderer.on('main:amqp:message-received', handleMessageReceived);
-    ipcRenderer.on('main:amqp:message-published', handlePublished);
-    ipcRenderer.on('main:amqp:consumer-stopped', handleConsumerStopped);
+    const removeMessageReceived = ipcRenderer.on('main:amqp:message-received', handleMessageReceived);
+    const removePublished = ipcRenderer.on('main:amqp:message-published', handlePublished);
+    const removeConsumerStopped = ipcRenderer.on('main:amqp:consumer-stopped', handleConsumerStopped);
 
     return () => {
-      ipcRenderer.removeListener('main:amqp:message-received', handleMessageReceived);
-      ipcRenderer.removeListener('main:amqp:message-published', handlePublished);
-      ipcRenderer.removeListener('main:amqp:consumer-stopped', handleConsumerStopped);
+      removeMessageReceived();
+      removePublished();
+      removeConsumerStopped();
     };
   }, [item.uid, collection.uid]);
 
