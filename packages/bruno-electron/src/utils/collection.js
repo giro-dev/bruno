@@ -665,8 +665,22 @@ const transformRequestToSaveToFilesystem = (item) => {
     delete itemToSave.request.params;
   }
 
-  // Only process params for non-gRPC requests
-  if (_item.type !== 'grpc-request') {
+  if (_item.type === 'amqp-request') {
+    itemToSave.request.exchange = _item.request.exchange || '';
+    itemToSave.request.exchangeType = _item.request.exchangeType || 'direct';
+    itemToSave.request.routingKey = _item.request.routingKey || '';
+    itemToSave.request.queue = _item.request.queue || '';
+    delete itemToSave.request.method;
+    delete itemToSave.request.params;
+  }
+
+  if (_item.type === 'ws-request') {
+    delete itemToSave.request.method;
+    delete itemToSave.request.params;
+  }
+
+  // Only process params for non-gRPC and non-AMQP/WS requests
+  if (!['grpc-request', 'amqp-request', 'ws-request'].includes(_item.type)) {
     each(_item.request.params, (param) => {
       itemToSave.request.params.push({
         uid: param.uid,
