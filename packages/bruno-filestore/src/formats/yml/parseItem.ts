@@ -9,6 +9,7 @@ import parseHttpRequest from './items/parseHttpRequest';
 import parseGraphQLRequest from './items/parseGraphQLRequest';
 import parseGrpcRequest from './items/parseGrpcRequest';
 import parseWebsocketRequest from './items/parseWebsocketRequest';
+import parseAmqpRequest from './items/parseAmqpRequest';
 import parseScript from './items/parseScript';
 
 // Helper to get the type from an item (now in info block)
@@ -83,6 +84,9 @@ const parseItem = (ymlString: string): BrunoItem => {
 
       case 'websocket':
         return parseWebsocketRequest(ocItem as WebSocketRequest);
+
+      case 'amqp':
+        return parseAmqpRequest(ocItem as any);
 
       case 'script':
         return parseScript(ocItem as ScriptFile);

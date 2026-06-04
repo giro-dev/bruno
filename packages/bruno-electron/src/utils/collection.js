@@ -516,12 +516,13 @@ const parseYmlFileMeta = (data) => {
     const yaml = require('js-yaml');
     const parsed = yaml.load(data);
 
-    if (!parsed || !parsed.meta) {
-      console.log('No "meta" section found in YAML file.');
+    const metaBlock = parsed?.info || parsed?.meta;
+    if (!parsed || !metaBlock) {
+      console.log('No "info" or "meta" section found in YAML file.');
       return null;
     }
 
-    const metaJson = parsed.meta;
+    const metaJson = metaBlock;
 
     // Transform to the format expected by bruno-app
     let requestType = metaJson.type;

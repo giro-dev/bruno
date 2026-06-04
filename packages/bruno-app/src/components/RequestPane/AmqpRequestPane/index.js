@@ -59,7 +59,7 @@ const AmqpRequestPane = ({ item, collection, handleRun }) => {
         indicator: docs && docs.length > 0 ? <StatusDot type="default" /> : null
       }
     ];
-  }, [activeHeadersLength, auth.mode, docs]);
+  }, [activeHeadersLength, auth?.mode, docs]);
 
   const tabPanel = useMemo(() => {
     switch (requestPaneTab) {
