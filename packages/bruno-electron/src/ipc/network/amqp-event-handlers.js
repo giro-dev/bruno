@@ -62,10 +62,16 @@ const prepareAmqpRequest = async (item, collection, environment, runtimeVariable
   };
 
   // Interpolate variables in AMQP-specific fields
-  amqpRequest.url = interpolateString(amqpRequest.url, [...envVars, ...Object.entries(runtimeVariables || {}).map(([name, value]) => ({ name, value })), ...Object.entries(processEnvVars || {}).map(([name, value]) => ({ name, value }))]);
-  amqpRequest.exchange = interpolateString(amqpRequest.exchange, [...envVars, ...Object.entries(runtimeVariables || {}).map(([name, value]) => ({ name, value })), ...Object.entries(processEnvVars || {}).map(([name, value]) => ({ name, value }))]);
-  amqpRequest.routingKey = interpolateString(amqpRequest.routingKey, [...envVars, ...Object.entries(runtimeVariables || {}).map(([name, value]) => ({ name, value })), ...Object.entries(processEnvVars || {}).map(([name, value]) => ({ name, value }))]);
-  amqpRequest.queue = interpolateString(amqpRequest.queue, [...envVars, ...Object.entries(runtimeVariables || {}).map(([name, value]) => ({ name, value })), ...Object.entries(processEnvVars || {}).map(([name, value]) => ({ name, value }))]);
+  const interpolationOptions = {
+    envVars,
+    collectionVariables,
+    processEnvVars,
+    runtimeVariables: runtimeVariables || {}
+  };
+  amqpRequest.url = interpolateString(amqpRequest.url, interpolationOptions);
+  amqpRequest.exchange = interpolateString(amqpRequest.exchange, interpolationOptions);
+  amqpRequest.routingKey = interpolateString(amqpRequest.routingKey, interpolationOptions);
+  amqpRequest.queue = interpolateString(amqpRequest.queue, interpolationOptions);
 
   return amqpRequest;
 };
