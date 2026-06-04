@@ -1756,7 +1756,25 @@ export const collectionsSlice = createSlice({
               item.draft.request.body.ws = action.payload.content;
               break;
             }
+            case 'amqp': {
+              item.draft.request.body.amqp = action.payload.content;
+              break;
+            }
           }
+        }
+      }
+    },
+    updateAmqpRequestField: (state, action) => {
+      const collection = findCollectionByUid(state.collections, action.payload.collectionUid);
+
+      if (collection) {
+        const item = findItemInCollection(collection, action.payload.itemUid);
+
+        if (item && isItemARequest(item)) {
+          if (!item.draft) {
+            item.draft = cloneDeep(item);
+          }
+          item.draft.request[action.payload.field] = action.payload.value;
         }
       }
     },
@@ -3751,6 +3769,7 @@ export const {
   updateRequestAuthMode,
   updateRequestBodyMode,
   updateRequestBody,
+  updateAmqpRequestField,
   updateRequestGraphqlQuery,
   updateRequestGraphqlVariables,
   updateRequestScript,
