@@ -150,6 +150,9 @@ export const stringifyBruRequest = (json: any): string => {
       case 'ws-request':
         type = 'ws';
         break;
+      case 'amqp-request':
+        type = 'amqp';
+        break;
       default:
         type = 'http';
     }
@@ -213,6 +216,25 @@ export const stringifyBruRequest = (json: any): string => {
       bruJson.body = _.get(json, 'request.body', {
         mode: 'ws',
         ws: _.get(json, 'request.body.ws', [
+          {
+            name: 'message 1',
+            content: '{}'
+          }
+        ])
+      });
+    } else if (type === 'amqp') {
+      bruJson.amqp = {
+        url: _.get(json, 'request.url'),
+        auth: _.get(json, 'request.auth.mode', 'none'),
+        exchange: _.get(json, 'request.exchange', ''),
+        exchangeType: _.get(json, 'request.exchangeType', 'direct'),
+        routingKey: _.get(json, 'request.routingKey', ''),
+        queue: _.get(json, 'request.queue', '')
+      };
+
+      bruJson.body = _.get(json, 'request.body', {
+        mode: 'amqp',
+        amqp: _.get(json, 'request.body.amqp', [
           {
             name: 'message 1',
             content: '{}'
