@@ -51,7 +51,8 @@ const RequestTab = ({ tab, collection, tabIndex, collectionRequestTabs, folderUi
       || tab.type === 'http-request'
       || tab.type === 'graphql-request'
       || tab.type === 'grpc-request'
-      || tab.type === 'ws-request';
+      || tab.type === 'ws-request'
+      || tab.type === 'amqp-request';
 
     if (!isRequestType || !tab.pathname || !item?.uid || tab.uid === item.uid) {
       return;
@@ -67,6 +68,8 @@ const RequestTab = ({ tab, collection, tabIndex, collectionRequestTabs, folderUi
         return 'gRPC';
       case 'ws-request':
         return 'WS';
+      case 'amqp-request':
+        return 'AMQP';
       case 'graphql-request':
         return 'GQL';
       default:
@@ -206,7 +209,7 @@ const RequestTab = ({ tab, collection, tabIndex, collectionRequestTabs, folderUi
 
   // Close tab shortcut — draft-aware, only active for the focused tab
   useKeybinding('closeTab', () => {
-    if (tab.type === 'request' || tab.type === 'grpc-request' || tab.type === 'ws-request' || tab.type === 'graphql-request') {
+    if (tab.type === 'request' || tab.type === 'grpc-request' || tab.type === 'ws-request' || tab.type === 'amqp-request' || tab.type === 'graphql-request') {
       if (hasChanges) {
         setShowConfirmClose(true);
       } else {
